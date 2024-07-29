@@ -42,15 +42,6 @@ train_summary_writer.set_as_default()
 os.environ["TF_USE_LEGACY_KERAS"] = "1"
 
 
-
-
-
-
-
-
-
-
-
 def dense_layer(num_units):
     return tf.keras.layers.Dense(
         num_units,
@@ -154,13 +145,9 @@ def create_agents(train_env, q_net, optimizer, train_step_counter):
 def main():
 
     num_iterations = 5000
-    initial_collect_steps = (
-        100
-    )
+    initial_collect_steps = 100
     collect_steps_per_iteration = 20
-    replay_buffer_max_length = (
-        1000000
-    )
+    replay_buffer_max_length = 1000000
     batch_size = 64
     learning_rate = 1e-3
     log_interval = 100
@@ -189,10 +176,6 @@ def main():
         time_step_spec=eval_env.time_step_spec(), action_spec=eval_env.action_spec()
     )
 
-
-
-
-
     time_step = train_env.reset()
     random_policy.action(time_step)
     agent = create_agents(
@@ -212,7 +195,6 @@ def main():
         max_steps=initial_collect_steps,
     ).run(train_py_env.reset())
 
-
     dataset = replay_buffer.as_dataset(
         num_parallel_calls=3,
         sample_batch_size=64,
@@ -228,23 +210,14 @@ def main():
         tf_metrics.AverageEpisodeLengthMetric(),
     ]
 
-
-
-
-
-
-
     agent.train = common.function(agent.train)
-
 
     agent.train_step_counter.assign(0)
 
     avg_return = compute_avg_return(eval_env, agent.policy, num_eval_episodes)
     returns = [avg_return]
 
-
     time_step = train_py_env.reset()
-
 
     collect_driver = py_driver.PyDriver(
         env,
@@ -256,7 +229,6 @@ def main():
     for _ in range(num_iterations):
 
         time_step, _ = collect_driver.run(time_step)
-
 
         experience, unused_info = next(iterator)
         experience = (tf.cast(experience[0], tf.int64),) + experience[1:]
@@ -272,10 +244,8 @@ def main():
             print("step = {0}: Average Return = {1}".format(step, avg_return))
             returns.append(avg_return)
 
-
         for metric in metrics:
             metric.tf_summaries(step=step, metrics=metrics)
-
 
     policy_dir = "/home/karolito/DL/DQN_game/policy"
     checkpoint_dir = "/home/karolito/DL/DQN_game/checkpoint"
